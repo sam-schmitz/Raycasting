@@ -9,13 +9,63 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "quickcg.h"
-using namespace QuickCG;
-
 #define mapWidth 24
 #define mapHeight 24
 #define screenWidth 640
 #define screenHeight 480
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    switch (key) {
+    case GLFW_KEY_RIGHT:
+        if (action == GLFW_PRESS) {
+            std::cout << "Should rotate right\n";
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+struct Engine {
+    GLFWwindow* window;
+    float width;
+    float height;
+
+    Engine() {
+        if (!glfwInit()) {
+            std::cout << "Failed to initialize GLFW\n";
+            exit(EXIT_FAILURE);
+        }
+        window = glfwCreateWindow(screenWidth, screenHeight, "Raycasting", NULL, NULL);
+        if (!window) {
+            std::cout << "Failed to create GLFW window\n";
+            glfwTerminate();
+            exit(EXIT_FAILURE);
+        }
+        glfwMakeContextCurrent(window);
+        glewExperimental = GL_TRUE;
+        if (glewInit() != GLEW_OK) {
+            std::cout << "Failed to initialize GLEW\n";
+            glfwDestroyWindow(window);
+            glfwTerminate();
+            exit(EXIT_FAILURE);
+        }
+        glViewport(0, 0, screenWidth, screenHeight);
+    }
+
+    void beginFrame() {
+        // clear the frame each render loop iteration
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+
+        glMatrixMode(GLPROJECTION);
+        glLoadIdentity();
+        glOrtho(0, screenWidth, screenHeight, 0, -1, -1);
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+    }
+};
+Engine engine;
 
 int worldMap[mapWidth][mapHeight] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -53,8 +103,13 @@ int main(int /*argc*/, char */*argv*/[])
     double time = 0;    //time of the current frame
     double oldTime = 0;     //time of the previous frame
     
-    screen(screenWidth, screenHeight, 0, "Raycaster");    
-    while (!done()) {
+    // Create Window
+    //screen(screenWidth, screenHeight, 0, "Raycaster");        
+
+
+    while (!glfwWindowShouldClose(engine.window)) {
+        engine.beginFrame();
+
         for (int x = 0; x < w; x++) {
             // Calculate ray position and direction
             double cameraX = 2 * x / double(w) - 1;
@@ -189,8 +244,11 @@ int main(int /*argc*/, char */*argv*/[])
             planeX = planeX * cos(rotSpeed) - planeY * sin(rotSpeed);
             planeY = oldPlaneX * sin(rotSpeed) + planeY * cos(rotSpeed);
         }
-    }
 
+        glfwSwapBuffers(engine.window);
+        glfwPollEvents();
+    }
+    return 0;
 
 }
 
