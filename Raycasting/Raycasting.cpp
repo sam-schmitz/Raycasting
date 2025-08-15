@@ -14,11 +14,41 @@
 #define screenWidth 640
 #define screenHeight 480
 
+int rotateDir = 0;
+int moveDir = 0;
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     switch (key) {
     case GLFW_KEY_RIGHT:
+        if (action == GLFW_PRESS) {            
+            rotateDir -= 1;
+        }
+        else if (action == GLFW_RELEASE) {
+            rotateDir += 1;
+        }
+        break;
+    case GLFW_KEY_LEFT:
+        if (action == GLFW_PRESS) {            
+            rotateDir += 1;
+        }
+        else if (action == GLFW_RELEASE) { 
+            rotateDir -= 1;
+        }
+        break;
+    case GLFW_KEY_UP: 
+        if (action == GLFW_PRESS) {            
+            moveDir += 1;
+        }
+        else if (action == GLFW_RELEASE) {
+            moveDir -= 1;
+        }
+        break;
+    case GLFW_KEY_DOWN:
         if (action == GLFW_PRESS) {
-            std::cout << "Should rotate right\n";
+            moveDir -= 1;
+        }
+        else if (action == GLFW_RELEASE){
+            moveDir += 1;
         }
         break;
     default:
@@ -28,8 +58,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 struct Engine {
     GLFWwindow* window;
-    float width;
-    float height;
 
     Engine() {
         if (!glfwInit()) {
@@ -51,15 +79,16 @@ struct Engine {
             exit(EXIT_FAILURE);
         }
         glViewport(0, 0, screenWidth, screenHeight);
+        glfwSetKeyCallback(window, key_callback);
     }
 
     void beginFrame() {
         // clear the frame each render loop iteration
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glMatrixMode(GLPROJECTION);
+        glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(0, screenWidth, screenHeight, 0, -1, -1);
+        glOrtho(0, screenWidth, screenHeight, 0, -1, 1);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
@@ -137,9 +166,9 @@ int main(int /*argc*/, char */*argv*/[])
     while (!glfwWindowShouldClose(engine.window)) {
         engine.beginFrame();
 
-        for (int x = 0; x < w; x++) {
+        for (int x = 0; x < screenWidth; x++) {
             // Calculate ray position and direction
-            double cameraX = 2 * x / double(w) - 1;
+            double cameraX = 2 * x / double(screenWidth) - 1;
             double rayDirX = dirX + planeX * cameraX;
             double rayDirY = dirY + planeY * cameraX;
 
@@ -204,13 +233,13 @@ int main(int /*argc*/, char */*argv*/[])
             else perpWallDist = (sideDistY - deltaDistY);
 
             //calculate height of line to draw on screen
-            int lineHeight = (int)(h / perpWallDist);
+            int lineHeight = (int)(screenHeight / perpWallDist);
 
             //calculate lowest and highest pixel to fill in current stage
-            int drawStart = -lineHeight / 2 + h / 2;
+            int drawStart = -lineHeight / 2 + screenHeight / 2;
             if (drawStart < 0) drawStart = 0;
-            int drawEnd = lineHeight / 2 + h / 2;
-            if (drawEnd >= h) drawEnd = h - 1;
+            int drawEnd = lineHeight / 2 + screenHeight / 2;
+            if (drawEnd >= screenHeight) drawEnd = screenHeight - 1;
 
             //choose wall color
             ColorRGB color;
@@ -229,34 +258,30 @@ int main(int /*argc*/, char */*argv*/[])
             verLine(x, drawStart, drawEnd, color);
         }
 
-        // timing fro input and FPS counter
-        oldTime = time;
-        time = getTicks();
+        // timing from input and FPS counter
+        oldTime = time;        
+        time = glfwGetTime() * 1000.0;
         double frameTime = (time - oldTime) / 1000.0;
-        std::cout << (1.0 / frameTime) << "\n";
-        //replaces redraw()
+        std::cout << (1.0 / frameTime) << "\n";        
         glfwSwapBuffers(engine.window);
-        glfwPollEvents();
-        //replaces cls()
+        glfwPollEvents();        
         engine.beginFrame();
 
         // speed modifiers
         double moveSpeed = frameTime * 5.0;
         double rotSpeed = frameTime * 3.0;
-
-        readKeys();
+              
         //move forward if no wall infront of you
-        if (keyDown(SDLK_UP)) {
+        if (moveDir > 0) {
             if (worldMap[int(posX + dirX * moveSpeed)][int(posY)] == false) posX += dirX * moveSpeed;
             if (worldMap[int(posX)][int(posY + dirY * moveSpeed)] == false) posY += dirY * moveSpeed;
         }
         // move backwards if not wall behind you
-        if (keyDown(SDLK_DOWN)) {
+        if (moveDir < 0) {
             if (worldMap[int(posX - dirX * moveSpeed)][int(posY)] == false) posX -= dirX * moveSpeed;
             if (worldMap[int(posX)][int(posY - dirY * moveSpeed)] == false) posY -= dirY * moveSpeed;
         }
-        //rotate to the right
-        if (keyDown(SDLK_RIGHT)) {
+        if (rotateDir < 0) {
             //both camera direction and camera plane must be rotated
             double oldDirX = dirX;
             dirX = dirX * cos(-rotSpeed) - dirY * sin(-rotSpeed);
@@ -265,15 +290,14 @@ int main(int /*argc*/, char */*argv*/[])
             planeX = planeX * cos(-rotSpeed) - planeY * sin(-rotSpeed);
             planeY = oldPlaneX * sin(-rotSpeed) + planeY * cos(-rotSpeed);
         }
-        //rotate to the left
-        if (keyDown(SDLK_LEFT)) {
+        if (rotateDir > 0) {
             double oldDirX = dirX;
             dirX = dirX * cos(rotSpeed) - dirY * sin(rotSpeed);
             dirY = oldDirX * sin(rotSpeed) + dirY * cos(rotSpeed);
             double oldPlaneX = planeX;
             planeX = planeX * cos(rotSpeed) - planeY * sin(rotSpeed);
             planeY = oldPlaneX * sin(rotSpeed) + planeY * cos(rotSpeed);
-        }     
+        }
     }
     return 0;
 

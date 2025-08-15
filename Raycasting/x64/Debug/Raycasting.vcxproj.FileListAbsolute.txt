@@ -1,1 +1,4 @@
 C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\x64\Debug\Raycasting.exe
+C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\x64\Debug\Raycasting.vcxproj.CopyComplete
+C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\x64\Debug\glew32d.dll
+C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\x64\Debug\glfw3.dll
