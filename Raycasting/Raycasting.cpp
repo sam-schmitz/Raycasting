@@ -89,6 +89,15 @@ const ColorRGB RGB_Blue = ColorRGB(0.0f, 0.0f, 1.0f);
 const ColorRGB RGB_White = ColorRGB(1.0f, 1.0f, 1.0f);
 const ColorRGB RGB_Yellow = ColorRGB(1.0f, 1.0f, 0.0f);
 
+void verLine(int x, int y1, int y2, const ColorRGB& color) {
+    color.apply();
+
+    glBegin(GL_LINES);
+    glVertex2i(x, y1);
+    glVertex2i(x, y2);
+    glEnd();
+}
+
 int worldMap[mapWidth][mapHeight] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
