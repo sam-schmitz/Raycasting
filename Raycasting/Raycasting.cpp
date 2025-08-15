@@ -67,6 +67,28 @@ struct Engine {
 };
 Engine engine;
 
+struct ColorRGB {
+    float r, g, b;
+
+    ColorRGB() : r(0), g(0), b(0) {}
+    ColorRGB(float red, float green, float blue) : r(red), g(green), b(blue) {}
+
+    // Divide brightness
+    ColorRGB operator/(float value) const {
+        return ColorRGB(r / value, g / value, b / value);
+    }
+
+    void apply() const {
+        glColor3f(r, g, b);
+    }
+};
+
+const ColorRGB RGB_Red = ColorRGB(1.0f, 0.0f, 0.0f);
+const ColorRGB RGB_Green = ColorRGB(0.0f, 1.0f, 0.0f);
+const ColorRGB RGB_Blue = ColorRGB(0.0f, 0.0f, 1.0f);
+const ColorRGB RGB_White = ColorRGB(1.0f, 1.0f, 1.0f);
+const ColorRGB RGB_Yellow = ColorRGB(1.0f, 1.0f, 0.0f);
+
 int worldMap[mapWidth][mapHeight] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -102,10 +124,6 @@ int main(int /*argc*/, char */*argv*/[])
 
     double time = 0;    //time of the current frame
     double oldTime = 0;     //time of the previous frame
-    
-    // Create Window
-    //screen(screenWidth, screenHeight, 0, "Raycaster");        
-
 
     while (!glfwWindowShouldClose(engine.window)) {
         engine.beginFrame();
@@ -206,9 +224,12 @@ int main(int /*argc*/, char */*argv*/[])
         oldTime = time;
         time = getTicks();
         double frameTime = (time - oldTime) / 1000.0;
-        print(1.0 / frameTime);
-        redraw();
-        cls();
+        std::cout << (1.0 / frameTime) << "\n";
+        //replaces redraw()
+        glfwSwapBuffers(engine.window);
+        glfwPollEvents();
+        //replaces cls()
+        engine.beginFrame();
 
         // speed modifiers
         double moveSpeed = frameTime * 5.0;
@@ -243,10 +264,7 @@ int main(int /*argc*/, char */*argv*/[])
             double oldPlaneX = planeX;
             planeX = planeX * cos(rotSpeed) - planeY * sin(rotSpeed);
             planeY = oldPlaneX * sin(rotSpeed) + planeY * cos(rotSpeed);
-        }
-
-        glfwSwapBuffers(engine.window);
-        glfwPollEvents();
+        }     
     }
     return 0;
 
