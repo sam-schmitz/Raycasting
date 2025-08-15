@@ -6,6 +6,11 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#include "quickcg.h"
+using namespace QuickCG;
 
 #define mapWidth 24
 #define mapHeight 24
@@ -47,8 +52,8 @@ int main(int /*argc*/, char */*argv*/[])
 
     double time = 0;    //time of the current frame
     double oldTime = 0;     //time of the previous frame
-
-    screen(screenWidth, screenHeight, 0, "Raycaster");
+    
+    screen(screenWidth, screenHeight, 0, "Raycaster");    
     while (!done()) {
         for (int x = 0; x < w; x++) {
             // Calculate ray position and direction
@@ -142,7 +147,48 @@ int main(int /*argc*/, char */*argv*/[])
             verLine(x, drawStart, drawEnd, color);
         }
 
+        // timing fro input and FPS counter
+        oldTime = time;
+        time = getTicks();
+        double frameTime = (time - oldTime) / 1000.0;
+        print(1.0 / frameTime);
+        redraw();
+        cls();
 
+        // speed modifiers
+        double moveSpeed = frameTime * 5.0;
+        double rotSpeed = frameTime * 3.0;
+
+        readKeys();
+        //move forward if no wall infront of you
+        if (keyDown(SDLK_UP)) {
+            if (worldMap[int(posX + dirX * moveSpeed)][int(posY)] == false) posX += dirX * moveSpeed;
+            if (worldMap[int(posX)][int(posY + dirY * moveSpeed)] == false) posY += dirY * moveSpeed;
+        }
+        // move backwards if not wall behind you
+        if (keyDown(SDLK_DOWN)) {
+            if (worldMap[int(posX - dirX * moveSpeed)][int(posY)] == false) posX -= dirX * moveSpeed;
+            if (worldMap[int(posX)][int(posY - dirY * moveSpeed)] == false) posY -= dirY * moveSpeed;
+        }
+        //rotate to the right
+        if (keyDown(SDLK_RIGHT)) {
+            //both camera direction and camera plane must be rotated
+            double oldDirX = dirX;
+            dirX = dirX * cos(-rotSpeed) - dirY * sin(-rotSpeed);
+            dirY = oldDirX * sin(-rotSpeed) + dirY * cos(-rotSpeed);
+            double oldPlaneX = planeX;
+            planeX = planeX * cos(-rotSpeed) - planeY * sin(-rotSpeed);
+            planeY = oldPlaneX * sin(-rotSpeed) + planeY * cos(-rotSpeed);
+        }
+        //rotate to the left
+        if (keyDown(SDLK_LEFT)) {
+            double oldDirX = dirX;
+            dirX = dirX * cos(rotSpeed) - dirY * sin(rotSpeed);
+            dirY = oldDirX * sin(rotSpeed) + dirY * cos(rotSpeed);
+            double oldPlaneX = planeX;
+            planeX = planeX * cos(rotSpeed) - planeY * sin(rotSpeed);
+            planeY = oldPlaneX * sin(rotSpeed) + planeY * cos(rotSpeed);
+        }
     }
 
 
