@@ -13,6 +13,8 @@
 #define mapHeight 24
 #define screenWidth 640
 #define screenHeight 480
+#define texWidth 64
+#define texHeight 64
 
 int rotateDir = 0;
 int moveDir = 0;
@@ -127,41 +129,62 @@ void verLine(int x, int y1, int y2, const ColorRGB& color) {
     glEnd();
 }
 
-int worldMap[mapWidth][mapHeight] = {
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
-    {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1},
-    {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+int worldMap[mapWidth][mapHeight] =
+{
+  {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,7,7,7,7,7,7,7,7},
+  {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,7},
+  {4,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7},
+  {4,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7},
+  {4,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,7},
+  {4,0,4,0,0,0,0,5,5,5,5,5,5,5,5,5,7,7,0,7,7,7,7,7},
+  {4,0,5,0,0,0,0,5,0,5,0,5,0,5,0,5,7,0,0,0,7,7,7,1},
+  {4,0,6,0,0,0,0,5,0,0,0,0,0,0,0,5,7,0,0,0,0,0,0,8},
+  {4,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,7,7,1},
+  {4,0,8,0,0,0,0,5,0,0,0,0,0,0,0,5,7,0,0,0,0,0,0,8},
+  {4,0,0,0,0,0,0,5,0,0,0,0,0,0,0,5,7,0,0,0,7,7,7,1},
+  {4,0,0,0,0,0,0,5,5,5,5,0,5,5,5,5,7,7,7,7,7,7,7,1},
+  {6,6,6,6,6,6,6,6,6,6,6,0,6,6,6,6,6,6,6,6,6,6,6,6},
+  {8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4},
+  {6,6,6,6,6,6,0,6,6,6,6,0,6,6,6,6,6,6,6,6,6,6,6,6},
+  {4,4,4,4,4,4,0,4,4,4,6,0,6,2,2,2,2,2,2,2,3,3,3,3},
+  {4,0,0,0,0,0,0,0,0,4,6,0,6,2,0,0,0,0,0,2,0,0,0,2},
+  {4,0,0,0,0,0,0,0,0,0,0,0,6,2,0,0,5,0,0,2,0,0,0,2},
+  {4,0,0,0,0,0,0,0,0,4,6,0,6,2,0,0,0,0,0,2,2,0,2,2},
+  {4,0,6,0,6,0,0,0,0,4,6,0,0,0,0,0,5,0,0,0,0,0,0,2},
+  {4,0,0,5,0,0,0,0,0,4,6,0,6,2,0,0,0,0,0,2,2,0,2,2},
+  {4,0,6,0,6,0,0,0,0,4,6,0,6,2,0,0,5,0,0,2,0,0,0,2},
+  {4,0,0,0,0,0,0,0,0,4,6,0,6,2,0,0,0,0,0,2,0,0,0,2},
+  {4,4,4,4,4,4,4,4,4,4,1,1,1,2,2,2,2,2,2,3,3,3,3,3}
 };
 
 int main(int /*argc*/, char */*argv*/[])
 {
-    double posX = 22, posY = 12;    //Player's starting location
-    double dirX = -1, dirY = 0;     //Player's starting direction
-    double planeX = 0, planeY = 0.66;   //Player's camera plane
+    double posX = 22.0, posY = 12.0;    //Player's starting location
+    double dirX = -1.0, dirY = 0.0;     //Player's starting direction
+    double planeX = 0.0, planeY = 0.66;   //Player's camera plane
 
     double time = 0;    //time of the current frame
     double oldTime = 0;     //time of the previous frame
+
+    Uint32 buffer[screenHeight][screenWidth];   // y-coordinate 1st becuase it works per scanline
+    std::vector<Uint32> texture[8];
+    for (int i = 0; i < 8; i++) texture[i].resize(texWidth * texHeight);
+
+    for (int x = 0; x < texWidth; x++) {
+        for (int y = 0; y < texHeight; y++) {
+            int xorcolor = (x * 256 / texWidth) ^ (y * 256 / texHeight);
+            int ycolor = y * 256 / texHeight;
+            int xycolor = y * 128 / texHeight + x * 128 / texWidth;
+            texture[0][texWidth * y + x] = 65536 * 254 * (x != y && x != texWidth - y); // flat red texture with black cross
+            texture[1][texWidth * y + x] = xycolor + 256 * xycolor + 65536 * xycolor; // sloped greyscale
+            texture[2][texWidth * y + x] = 256 * xycolor + 65536 * xycolor; // sloped yellow gradiant
+            texture[3][texWidth * y + x] = xorcolor + 256 * xorcolor + 65536 * xorcolor; // xor greyscale
+            texture[4][texWidth * y + x] = 256 * xorcolor; //xor green
+            texture[5][texWidth * y + x] = 65536 * 192 * (x % 16 && y % 16); //red bricks
+            texture[6][texWidth * y + x] = 65536 * ycolor;  //red gradiant
+            texture[7][texWidth * y + x] = 128 + 256 * 128 + 65536 * 128;
+        }
+    }        
 
     while (!glfwWindowShouldClose(engine.window)) {
         engine.beginFrame();
@@ -241,6 +264,7 @@ int main(int /*argc*/, char */*argv*/[])
             int drawEnd = lineHeight / 2 + screenHeight / 2;
             if (drawEnd >= screenHeight) drawEnd = screenHeight - 1;
 
+            /*
             //choose wall color
             ColorRGB color;
             switch (worldMap[mapX][mapY]) {
@@ -256,6 +280,25 @@ int main(int /*argc*/, char */*argv*/[])
 
             //draw the pixeld of the stripe as a vertical line
             verLine(x, drawStart, drawEnd, color);
+            */
+
+            //texturing calculations
+            int texNum = worldMap[mapX][mapY] - 1;
+
+            //calculate value of wallX
+            double wallX;   //where exactly the wall was hit
+            if (side == 0) {
+                wallX = posY + perpWallDist * rayDirY;
+            }
+            else {
+                wallX = posX + perpWallDist * rayDirX;
+            }
+            wallX -= floor((wallX));
+
+            //x coordinate on the texture
+            int texX = int(wallX * double(texWidth));
+            if (side == 0 && rayDirX > 0) texX = texWidth - texX - 1;
+            if (side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
         }
 
         // timing from input and FPS counter
