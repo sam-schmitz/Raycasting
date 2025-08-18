@@ -8,6 +8,7 @@
 #include <cmath>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <cstdint>
 
 #define mapWidth 24
 #define mapHeight 24
@@ -15,6 +16,8 @@
 #define screenHeight 480
 #define texWidth 64
 #define texHeight 64
+
+using Uint32 = uint32_t;
 
 int rotateDir = 0;
 int moveDir = 0;
@@ -129,6 +132,10 @@ void verLine(int x, int y1, int y2, const ColorRGB& color) {
     glEnd();
 }
 
+void drawBuffer(const Uint32* pixels) {
+    glDrawPixels(screenWidth, screenHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+}
+
 int worldMap[mapWidth][mapHeight] =
 {
   {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,7,7,7,7,7,7,7,7},
@@ -157,6 +164,10 @@ int worldMap[mapWidth][mapHeight] =
   {4,4,4,4,4,4,4,4,4,4,1,1,1,2,2,2,2,2,2,3,3,3,3,3}
 };
 
+inline Uint32 makeRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) {
+    return (Uint32(a) << 24) | (Uint32(r) << 16) | (Uint32(g) << 8) | Uint32(b);
+}
+
 int main(int /*argc*/, char */*argv*/[])
 {
     double posX = 22.0, posY = 12.0;    //Player's starting location
@@ -166,7 +177,9 @@ int main(int /*argc*/, char */*argv*/[])
     double time = 0;    //time of the current frame
     double oldTime = 0;     //time of the previous frame
 
-    Uint32 buffer[screenHeight][screenWidth];   // y-coordinate 1st becuase it works per scanline
+    //Uint32 buffer[screenHeight][screenWidth];   // y-coordinate 1st becuase it works per scanline
+    std::vector<Uint32> buffer(screenWidth * screenHeight);
+
     std::vector<Uint32> texture[8];
     for (int i = 0; i < 8; i++) texture[i].resize(texWidth * texHeight);
 
@@ -174,15 +187,16 @@ int main(int /*argc*/, char */*argv*/[])
         for (int y = 0; y < texHeight; y++) {
             int xorcolor = (x * 256 / texWidth) ^ (y * 256 / texHeight);
             int ycolor = y * 256 / texHeight;
-            int xycolor = y * 128 / texHeight + x * 128 / texWidth;
-            texture[0][texWidth * y + x] = 65536 * 254 * (x != y && x != texWidth - y); // flat red texture with black cross
-            texture[1][texWidth * y + x] = xycolor + 256 * xycolor + 65536 * xycolor; // sloped greyscale
-            texture[2][texWidth * y + x] = 256 * xycolor + 65536 * xycolor; // sloped yellow gradiant
-            texture[3][texWidth * y + x] = xorcolor + 256 * xorcolor + 65536 * xorcolor; // xor greyscale
-            texture[4][texWidth * y + x] = 256 * xorcolor; //xor green
-            texture[5][texWidth * y + x] = 65536 * 192 * (x % 16 && y % 16); //red bricks
-            texture[6][texWidth * y + x] = 65536 * ycolor;  //red gradiant
-            texture[7][texWidth * y + x] = 128 + 256 * 128 + 65536 * 128;
+            int xycolor = y * 128 / texHeight + x * 128 / texWidth;            
+            //Updated way of making textures
+            texture[0][texWidth * y + x] = makeRGBA(254 * (x != y && x != texWidth - y), 0, 0);
+            texture[1][texWidth * y + x] = makeRGBA(xycolor, xycolor, xycolor);
+            texture[2][texWidth * y + x] = makeRGBA(xycolor, xycolor, 0);
+            texture[3][texWidth * y + x] = makeRGBA(xorcolor, xorcolor, xorcolor);
+            texture[4][texWidth * y + x] = makeRGBA(0, xorcolor, 0);
+            texture[5][texWidth * y + x] = makeRGBA(192 * (x % 16 && y % 16), 0, 0);
+            texture[6][texWidth * y + x] = makeRGBA(ycolor, 0, 0);
+            texture[7][texWidth * y + x] = makeRGBA(128, 128, 128);
         }
     }        
 
@@ -301,18 +315,19 @@ int main(int /*argc*/, char */*argv*/[])
             if (side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
 
             double step = 1.0 * texHeight / lineHeight;
-            double texPos = (drawStart - h / 2 + lineHeight / 2) * step;
+            double texPos = (drawStart - screenHeight / 2 + lineHeight / 2) * step;
             for (int y = drawStart; y < drawEnd; y++) {
                 int texY = (int)texPos & (texHeight - 1);
                 texPos += step;
                 Uint32 color = texture[texNum][texHeight * texY + texX];
                 if (side == 1) color = (color >> 1) & 8355711;
-                buffer[y][x] = color;
+                buffer[y * screenWidth + x] = color;
             }
         }
-        drawBuffer(buffer[0]);
+        drawBuffer(buffer.data());
         //clear the buffer instead of cls()
-        for (int y = 0; y < screenHeight; y++) for (int x = 0; x < screenWidth; x++) buffer[y][x] = 0;  
+        std::fill(buffer.begin(), buffer.end(), 0);
+        //for (int y = 0; y < screenHeight; y++) for (int x = 0; x < screenWidth; x++) buffer[y][x] = 0;  
         // timing from input and FPS counter
         oldTime = time;        
         time = glfwGetTime() * 1000.0;
