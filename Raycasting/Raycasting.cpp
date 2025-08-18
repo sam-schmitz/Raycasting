@@ -299,8 +299,20 @@ int main(int /*argc*/, char */*argv*/[])
             int texX = int(wallX * double(texWidth));
             if (side == 0 && rayDirX > 0) texX = texWidth - texX - 1;
             if (side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
-        }
 
+            double step = 1.0 * texHeight / lineHeight;
+            double texPos = (drawStart - h / 2 + lineHeight / 2) * step;
+            for (int y = drawStart; y < drawEnd; y++) {
+                int texY = (int)texPos & (texHeight - 1);
+                texPos += step;
+                Uint32 color = texture[texNum][texHeight * texY + texX];
+                if (side == 1) color = (color >> 1) & 8355711;
+                buffer[y][x] = color;
+            }
+        }
+        drawBuffer(buffer[0]);
+        //clear the buffer instead of cls()
+        for (int y = 0; y < screenHeight; y++) for (int x = 0; x < screenWidth; x++) buffer[y][x] = 0;  
         // timing from input and FPS counter
         oldTime = time;        
         time = glfwGetTime() * 1000.0;
