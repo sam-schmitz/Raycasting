@@ -1,10 +1,10 @@
 ﻿  Raycasting.cpp
-C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(209,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(210,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(211,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(212,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(230,26): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(231,26): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(208,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(209,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(210,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(211,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(266,26): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\Raycasting.cpp(267,26): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   Raycasting.vcxproj -> C:\Users\sschm\Documents\Coding Practice\Raycasting\Raycasting\x64\Debug\Raycasting.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.

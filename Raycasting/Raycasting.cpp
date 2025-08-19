@@ -204,18 +204,18 @@ int main(int /*argc*/, char */*argv*/[])
         engine.beginFrame();
 
         // Floor Casting
-        for (int y = 0; y < screenHeight; y++) {
-            //rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
-            float rayDirX0 = dirX - planeX;
-            float rayDirY0 = dirY - planeY;
-            float rayDirX1 = dirX + planeX;
-            float rayDirY1 = dirY + planeY;
+        //rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
+        float rayDirX0 = dirX - planeX;
+        float rayDirY0 = dirY - planeY;
+        float rayDirX1 = dirX + planeX;
+        float rayDirY1 = dirY + planeY;
 
+        // Vertical position of the camera
+        float posZ = 0.5 * screenHeight;
+        /*
+        for (int y = 0; y < screenHeight; y++) {            
             //Current y position compared to the center of the screen (the horizon)
-            int p = y - screenHeight / 2;
-
-            // Vertical position of the camera
-            float posZ = 0.5 * screenHeight;
+            int p = y - screenHeight / 2;            
 
             // Horizontal distance from the camera to the flooe for the current row
             // 0.5 is the z position exactly in the middle between floor and ceiling
@@ -228,12 +228,12 @@ int main(int /*argc*/, char */*argv*/[])
 
             // real world coordinated of the leftmost column. Will be updated as we step right
             float floorX = posX + rowDistance * rayDirX0;
-            float floorY = posY + rowDistance * rayDirY0;
-
-            int tx = int(texWidth * (floorX - floor((floorX)))) & (texWidth - 1);
-            int ty = int(texHeight * (floorY - floor((floorY)))) & (texHeight - 1);
+            float floorY = posY + rowDistance * rayDirY0;            
 
             for (int x = 0; x < screenWidth; ++x) {
+                int tx = int(texWidth * (floorX - floor((floorX)))) & (texWidth - 1);
+                int ty = int(texHeight * (floorY - floor((floorY)))) & (texHeight - 1);
+
                 // cell coord is simply got form the integer parts of floorX and floorY
                 int cellX = (int)(floorX);
                 int cellY = (int)(floorY);
@@ -254,6 +254,35 @@ int main(int /*argc*/, char */*argv*/[])
                 buffer[(screenHeight - y - 1) * screenWidth + x] = color;
             }
         }
+        */
+        
+        for (int y = screenHeight / 2 + 1; y < screenHeight; ++y) {
+            int p = y - screenHeight / 2;
+            float rowDistance = posZ / float(p);
+
+            float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / float(screenWidth);
+            float floorStepY = rowDistance * (rayDirY1 - rayDirY0) / float(screenWidth);
+
+            float floorX = posX + rowDistance * rayDirX0;
+            float floorY = posY + rowDistance * rayDirY0;
+
+            for (int x = 0; x < screenWidth; ++x) {
+                int tx = int(texWidth * (floorX - std::floor(floorX))) & (texWidth - 1);
+                int ty = int(texHeight * (floorY - std::floor(floorY))) & (texHeight - 1);
+
+                int floorTexture = 3;
+                int ceilingTexture = 6;
+
+                Uint32 colFloor = texture[floorTexture][ty * texWidth + tx];
+                Uint32 colCeiling = texture[ceilingTexture][ty * texWidth + tx];
+
+                buffer[y * screenWidth + x] = colFloor;
+                buffer[(screenHeight - y - 1) * screenWidth + x] = colCeiling;
+
+                floorX += floorStepX;
+                floorY = floorStepY;
+            }
+        }        
 
         for (int x = 0; x < screenWidth; x++) {
             // Calculate ray position and direction
