@@ -182,26 +182,78 @@ int main(int /*argc*/, char */*argv*/[])
 
     std::vector<Uint32> texture[8];
     for (int i = 0; i < 8; i++) texture[i].resize(texWidth * texHeight);
-
+    
     for (int x = 0; x < texWidth; x++) {
         for (int y = 0; y < texHeight; y++) {
             int xorcolor = (x * 256 / texWidth) ^ (y * 256 / texHeight);
             int ycolor = y * 256 / texHeight;
             int xycolor = y * 128 / texHeight + x * 128 / texWidth;            
             //Updated way of making textures
-            texture[0][texWidth * y + x] = makeRGBA(254 * (x != y && x != texWidth - y), 0, 0);
-            texture[1][texWidth * y + x] = makeRGBA(xycolor, xycolor, xycolor);
-            texture[2][texWidth * y + x] = makeRGBA(xycolor, xycolor, 0);
-            texture[3][texWidth * y + x] = makeRGBA(xorcolor, xorcolor, xorcolor);
-            texture[4][texWidth * y + x] = makeRGBA(0, xorcolor, 0);
-            texture[5][texWidth * y + x] = makeRGBA(192 * (x % 16 && y % 16), 0, 0);
-            texture[6][texWidth * y + x] = makeRGBA(ycolor, 0, 0);
-            texture[7][texWidth * y + x] = makeRGBA(128, 128, 128);
+            texture[0][texWidth * y + x] = makeRGBA(254 * (x != y && x != texWidth - y), 0, 0); //flat red texture with black cross
+            texture[1][texWidth * y + x] = makeRGBA(xycolor, xycolor, xycolor); //sloped greyscale
+            texture[2][texWidth * y + x] = makeRGBA(xycolor, xycolor, 0);   //sloped yellow gradiant
+            texture[3][texWidth * y + x] = makeRGBA(xorcolor, xorcolor, xorcolor);  //xor greyscale
+            texture[4][texWidth * y + x] = makeRGBA(0, xorcolor, 0);    //xor green
+            texture[5][texWidth * y + x] = makeRGBA(192 * (x % 16 && y % 16), 0, 0);    //red bricks
+            texture[6][texWidth * y + x] = makeRGBA(ycolor, 0, 0);  //red gradiant
+            texture[7][texWidth * y + x] = makeRGBA(128, 128, 128); //constant grey
         }
     }        
 
     while (!glfwWindowShouldClose(engine.window)) {
         engine.beginFrame();
+
+        // Floor Casting
+        for (int y = 0; y < screenHeight; y++) {
+            //rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
+            float rayDirX0 = dirX - planeX;
+            float rayDirY0 = dirY - planeY;
+            float rayDirX1 = dirX + planeX;
+            float rayDirY1 = dirY + planeY;
+
+            //Current y position compared to the center of the screen (the horizon)
+            int p = y - screenHeight / 2;
+
+            // Vertical position of the camera
+            float posZ = 0.5 * screenHeight;
+
+            // Horizontal distance from the camera to the flooe for the current row
+            // 0.5 is the z position exactly in the middle between floor and ceiling
+            float rowDistance = posZ / p;
+
+            // calculate the real world step vector we have to add for each x (parallel to camera plane)
+            // adding step by step avoids multiplcations with a weight in the inner loop
+            float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / screenWidth;
+            float floorStepY = rowDistance * (rayDirY1 - rayDirY0) / screenWidth;
+
+            // real world coordinated of the leftmost column. Will be updated as we step right
+            float floorX = posX + rowDistance * rayDirX0;
+            float floorY = posY + rowDistance * rayDirY0;
+
+            int tx = int(texWidth * (floorX - floor((floorX)))) & (texWidth - 1);
+            int ty = int(texHeight * (floorY - floor((floorY)))) & (texHeight - 1);
+
+            for (int x = 0; x < screenWidth; ++x) {
+                // cell coord is simply got form the integer parts of floorX and floorY
+                int cellX = (int)(floorX);
+                int cellY = (int)(floorY);
+
+                // get the texture and draw the pizel
+                int floorTexture = 3;
+                int ceilingTexture = 6;
+                Uint32 color;
+
+                // floor
+                color = texture[floorTexture][texWidth * ty + tx];
+                color = (color >> 1) & 8355711;     // add a slight darkness
+                buffer[y * screenWidth + x] = color;
+
+                // ceiling 
+                color = texture[ceilingTexture][texWidth * ty + tx];
+                color = (color >> 1) & 8355711;
+                buffer[(screenHeight - y - 1) * screenWidth + x] = color;
+            }
+        }
 
         for (int x = 0; x < screenWidth; x++) {
             // Calculate ray position and direction
